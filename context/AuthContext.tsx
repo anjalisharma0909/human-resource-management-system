@@ -49,17 +49,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshAccessToken = useCallback(async () => {
     try {
-      const response = await axios.post('/api/auth/refresh');
-      if (response.data.success) {
-        const { accessToken: newAccessToken, user: loggedUser } = response.data;
-        setAccessToken(newAccessToken);
-        setUser(loggedUser);
-        return newAccessToken;
+      const storedToken = localStorage.getItem('access_token');
+      const storedUser = localStorage.getItem('user');
+      
+      if (storedToken && storedUser) {
+        setAccessToken(storedToken);
+        setUser(JSON.parse(storedUser));
+        return storedToken;
       }
     } catch (error) {
-      
       setAccessToken(null);
       setUser(null);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
     }
     return null;
   }, []);
@@ -72,26 +74,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
   }, [refreshAccessToken]);
 
-  useEffect(() => {
-    if (!accessToken) return;
-
-    const refreshInterval = setInterval(() => {
-      refreshAccessToken();
-    }, 14 * 60 * 1000); 
-
-    return () => clearInterval(refreshInterval);
-  }, [accessToken, refreshAccessToken]);
-
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      if (response.data.success) {
-        const { accessToken: newAccessToken, user: loggedUser } = response.data;
-        setAccessToken(newAccessToken);
+      const response = await axios.post('/api/v1/auth/login', { email, password });
+      
+      if (response.data.access_token) {
+        const { access_token, role } = response.data;
+        
+        const loggedUser: User = {
+          id: 'USR001',
+          name: email.split('@')[0].toUpperCase(),
+          email: email,
+          role: role,
+          avatarUrl: ''
+        };
+        
+        setAccessToken(access_token);
         setUser(loggedUser);
+        
+        localStorage.setItem('access_token', access_token);
+        localStorage.setItem('user', JSON.stringify(loggedUser));
+        
         toast.success(`Welcome back, ${loggedUser.name}!`);
 
-        if (loggedUser.role === 'Admin' || loggedUser.role === 'Manager') {
+        if (role === 'Admin' || role === 'Manager') {
           router.push('/admin/dashboard');
         } else {
           router.push('/employee/dashboard');
@@ -100,26 +106,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return false;
     } catch (error: any) {
-      const errorMsg = error.response?.data?.error || 'Failed to login. Please try again.';
+      const errorMsg = error.response?.data?.detail || 'Failed to login. Please try again.';
       toast.error(errorMsg);
       return false;
     }
   };
 
   const logout = async () => {
-    try {
-      await axios.post('/api/auth/logout');
-      setAccessToken(null);
-      setUser(null);
-      toast.success('Logged out successfully');
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      
-      setAccessToken(null);
-      setUser(null);
-      router.push('/login');
-    }
+    setAccessToken(null);
+    setUser(null);
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
+    toast.success('Logged out successfully');
+    router.push('/login');
   };
 
   return (

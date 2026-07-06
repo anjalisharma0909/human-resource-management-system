@@ -3,229 +3,147 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, Hash, ArrowRight } from 'lucide-react';
-
-type LoginMode = 'email' | 'employeeId';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Briefcase } from 'lucide-react';
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const [mode, setMode] = useState<LoginMode>('email');
-  const [email, setEmail] = useState('shruti14@gmail.com');
-  const [employeeId, setEmployeeId] = useState('');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = () => {
-    const tempErrors: Record<string, string> = {};
-
-    if (mode === 'email') {
-      if (!email) {
-        tempErrors.identifier = 'Email address is required';
-      } else if (!/\S+@\S+\.\S+/.test(email)) {
-        tempErrors.identifier = 'Enter a valid email address';
-      }
-    } else {
-      if (!employeeId.trim()) {
-        tempErrors.identifier = 'Employee ID is required';
-      }
-    }
-
-    if (!password) {
-      tempErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      tempErrors.password = 'Password must be at least 6 characters';
-    }
-
-    setErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0;
+    const e: Record<string, string> = {};
+    if (!email) e.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Enter a valid email';
+    if (!password) e.password = 'Password is required';
+    else if (password.length < 6) e.password = 'At least 6 characters';
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-
     setIsSubmitting(true);
-    const identifier = mode === 'email' ? email : employeeId;
-    await login(identifier, password);
+    await login(email, password);
     setIsSubmitting(false);
   };
 
-  const switchMode = (newMode: LoginMode) => {
-    setMode(newMode);
-    setErrors({});
-    setEmail('');
-    setEmployeeId('');
-  };
-
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#070510] overflow-hidden px-4">
-      
-      <div className="glow-blob glow-purple w-[420px] h-[420px] -top-24 -left-24 animate-pulse-glow" />
-      <div className="glow-blob glow-cyan w-[480px] h-[480px] -bottom-28 -right-24 animate-pulse-glow" style={{ animationDelay: '-4s' }} />
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'var(--bg)', padding: '24px 16px',
+    }}>
+      <div style={{ width: '100%', maxWidth: 380 }} className="animate-slide-up">
 
-      <div className="relative z-10 w-full max-w-[420px] animate-slide-up">
-
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 shadow-lg shadow-violet-900/40 border border-violet-400/20 mb-4">
-            <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-white" stroke="currentColor" strokeWidth="1.8">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div style={{
+            width: 48, height: 48, borderRadius: 12,
+            background: 'linear-gradient(135deg, var(--accent), #7a5af8)', margin: '0 auto 16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 14px rgba(79, 142, 247, 0.25)', border: '1px solid var(--accent-border)'
+          }}>
+            <Briefcase size={22} color="#fff" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">HRMS Portal</h1>
-          <p className="text-slate-400 text-sm mt-1">Sign in to access your workspace</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 6 }}>
+            Sign in to HRMS
+          </h1>
+          <p style={{ fontSize: 13.5, color: 'var(--text-secondary)' }}>
+            Enter your credentials to continue
+          </p>
         </div>
 
-        <div className="glass-panel rounded-2xl p-7 border border-white/[0.08] shadow-2xl shadow-black/40">
-
-          <div className="flex bg-white/5 rounded-lg p-1 mb-6">
-            <button
-              type="button"
-              onClick={() => switchMode('email')}
-              className={`flex-1 text-sm py-2 rounded-md font-medium transition-all duration-200 ${
-                mode === 'email'
-                  ? 'bg-violet-600 text-white shadow shadow-violet-900/40'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Email
-            </button>
-            <button
-              type="button"
-              onClick={() => switchMode('employeeId')}
-              className={`flex-1 text-sm py-2 rounded-md font-medium transition-all duration-200 ${
-                mode === 'employeeId'
-                  ? 'bg-violet-600 text-white shadow shadow-violet-900/40'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Employee ID
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div style={{
+          background: 'var(--surface)', border: '1px solid var(--border)',
+          borderRadius: 12, padding: '28px 28px',
+        }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                {mode === 'email' ? 'Email Address' : 'Employee ID'}
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                Email address
               </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  {mode === 'email' ? <Mail className="w-4.5 h-4.5" /> : <Hash className="w-4.5 h-4.5" />}
-                </span>
-                {mode === 'email' ? (
-                  <input
-                    key="email-input"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@company.com"
-                    autoComplete="email"
-                    className={`w-full pl-10 pr-4 py-2.5 rounded-lg glass-input text-sm ${
-                      errors.identifier ? 'border-red-500/60' : ''
-                    }`}
-                  />
-                ) : (
-                  <input
-                    key="empid-input"
-                    type="text"
-                    value={employeeId}
-                    onChange={(e) => setEmployeeId(e.target.value.toUpperCase())}
-                    placeholder="EMP001"
-                    autoComplete="username"
-                    className={`w-full pl-10 pr-4 py-2.5 rounded-lg glass-input text-sm tracking-widest ${
-                      errors.identifier ? 'border-red-500/60' : ''
-                    }`}
-                  />
-                )}
+              <div style={{ position: 'relative' }}>
+                <Mail size={14} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  className="saas-input"
+                  style={{ paddingLeft: 34, borderColor: errors.email ? 'var(--danger)' : undefined }}
+                />
               </div>
-              {errors.identifier && (
-                <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1">
-                  <span className="inline-block w-1 h-1 rounded-full bg-red-400" />
-                  {errors.identifier}
-                </p>
-              )}
+              {errors.email && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 5 }}>{errors.email}</p>}
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-slate-300">Password</label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
-                >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <label style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text-secondary)' }}>Password</label>
+                <Link href="/forgot-password" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'none' }}>
                   Forgot password?
                 </Link>
               </div>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Lock className="w-4.5 h-4.5" />
-                </span>
+              <div style={{ position: 'relative' }}>
+                <Lock size={14} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className={`w-full pl-10 pr-10 py-2.5 rounded-lg glass-input text-sm ${
-                    errors.password ? 'border-red-500/60' : ''
-                  }`}
+                  className="saas-input"
+                  style={{ paddingLeft: 34, paddingRight: 38, borderColor: errors.password ? 'var(--danger)' : undefined }}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
+                  onClick={() => setShowPassword(v => !v)}
                   tabIndex={-1}
+                  style={{
+                    position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
+                    display: 'flex', alignItems: 'center',
+                  }}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1">
-                  <span className="inline-block w-1 h-1 rounded-full bg-red-400" />
-                  {errors.password}
-                </p>
-              )}
+              {errors.password && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 5 }}>{errors.password}</p>}
             </div>
 
-            <label className="flex items-center gap-2.5 cursor-pointer select-none group w-fit">
-              <input
-                id="remember_me"
-                type="checkbox"
-                className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-500/40 focus:ring-offset-0"
-              />
-              <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
-                Keep me signed in
-              </span>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              <input type="checkbox" style={{ width: 14, height: 14, accentColor: 'var(--accent)', cursor: 'pointer' }} />
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Keep me signed in</span>
             </label>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-2.5 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-sm font-semibold rounded-lg shadow-md shadow-violet-900/30 border border-violet-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 group"
+              className="btn-primary"
+              style={{ width: '100%', justifyContent: 'center', padding: '10px 18px', fontSize: 14, opacity: isSubmitting ? 0.7 : 1 }}
             >
-              {isSubmitting ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  Sign In
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                </>
+              {isSubmitting ? <span className="spinner" /> : (
+                <>Sign In <ArrowRight size={14} /></>
               )}
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-white/[0.06] text-center text-sm text-slate-500">
-            New organization?{' '}
-            <Link href="/signup" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
-              Create an admin account
-            </Link>
+          <div style={{ marginTop: 20, paddingTop: 18, borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              New organization?{' '}
+              <Link href="/signup" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}>
+                Create an account
+              </Link>
+            </p>
           </div>
         </div>
 
+        <p style={{ textAlign: 'center', fontSize: 11.5, color: 'var(--text-muted)', marginTop: 24 }}>
+          © 2026 HRMS · Human Resource Management System
+        </p>
       </div>
     </div>
   );

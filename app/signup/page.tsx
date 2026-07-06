@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { User, Mail, Lock, Eye, EyeOff, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight, Briefcase } from 'lucide-react';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -18,175 +18,152 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = () => {
-    const tempErrors: Record<string, string> = {};
-    if (!adminName.trim()) tempErrors.adminName = 'Full name is required';
-    if (!email) {
-      tempErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      tempErrors.email = 'Enter a valid email address';
-    }
-    if (!password) {
-      tempErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      tempErrors.password = 'Must be at least 6 characters';
-    }
-    if (password !== confirmPassword) {
-      tempErrors.confirmPassword = 'Passwords do not match';
-    }
-    setErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0;
+    const e: Record<string, string> = {};
+    if (!adminName.trim()) e.adminName = 'Full name is required';
+    if (!email) e.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Enter a valid email';
+    if (!password) e.password = 'Password is required';
+    else if (password.length < 6) e.password = 'At least 6 characters';
+    if (password !== confirmPassword) e.confirmPassword = 'Passwords do not match';
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-
     setIsSubmitting(true);
     try {
-      const response = await axios.post('/api/auth/signup', {
-        adminName,
-        email,
-        password,
-      });
-
-      if (response.data.success) {
+      const names = adminName.trim().split(' ');
+      const first_name = names[0];
+      const last_name = names.length > 1 ? names.slice(1).join(' ') : 'Admin';
+      const response = await axios.post('/api/auth/signup', { first_name, last_name, email, password, role: 'Admin', department_name: 'HR' });
+      if (response.data.message) {
         toast.success('Account created! Please sign in.');
         router.push('/login');
       }
     } catch (error: any) {
-      const errorMsg = error.response?.data?.error || 'Registration failed. Please try again.';
-      toast.error(errorMsg);
+      toast.error(error.response?.data?.error || 'Registration failed.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#070510] overflow-hidden px-4 py-12">
-      
-      <div className="glow-blob glow-purple w-[400px] h-[400px] -top-20 -right-20 animate-pulse-glow" />
-      <div className="glow-blob glow-cyan w-[480px] h-[480px] -bottom-28 -left-20 animate-pulse-glow" style={{ animationDelay: '-5s' }} />
-
-      <div className="relative z-10 w-full max-w-[420px] animate-slide-up">
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'var(--bg)', padding: '24px 16px',
+    }}>
+      <div style={{ width: '100%', maxWidth: 380 }} className="animate-slide-up">
 
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors mb-8 group"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            fontSize: 13, color: 'var(--text-muted)', textDecoration: 'none',
+            marginBottom: 24, fontWeight: 500,
+          }}
         >
-          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-          Back to login
+          <ArrowLeft size={14} /> Back to login
         </Link>
 
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-violet-900/40 border border-violet-400/20 mb-4">
-            <ShieldCheck className="w-6 h-6 text-white" />
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <div style={{
+            width: 48, height: 48, borderRadius: 12,
+            background: 'linear-gradient(135deg, var(--accent), #7a5af8)', margin: '0 auto 16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 14px rgba(79, 142, 247, 0.25)', border: '1px solid var(--accent-border)'
+          }}>
+            <Briefcase size={22} color="#fff" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Create Admin Account</h1>
-          <p className="text-slate-400 text-sm mt-1">Set up access for your organization</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 6 }}>
+            Create Admin Account
+          </h1>
+          <p style={{ fontSize: 13.5, color: 'var(--text-secondary)' }}>
+            Set up access for your organization
+          </p>
         </div>
 
-        <div className="glass-panel rounded-2xl p-7 border border-white/[0.08] shadow-2xl shadow-black/40">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div style={{
+          background: 'var(--surface)', border: '1px solid var(--border)',
+          borderRadius: 12, padding: '28px 28px',
+        }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <User className="w-4 h-4" />
-                </span>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Full Name</label>
+              <div style={{ position: 'relative' }}>
+                <User size={14} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
-                  type="text"
-                  value={adminName}
-                  onChange={(e) => setAdminName(e.target.value)}
-                  placeholder="John Doe"
-                  autoComplete="name"
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-lg glass-input text-sm ${errors.adminName ? 'border-red-500/60' : ''}`}
+                  type="text" value={adminName} onChange={(e) => setAdminName(e.target.value)}
+                  placeholder="John Doe" className="saas-input"
+                  style={{ paddingLeft: 34, borderColor: errors.adminName ? 'var(--danger)' : undefined }}
                 />
               </div>
-              {errors.adminName && <p className="text-red-400 text-xs mt-1.5">{errors.adminName}</p>}
+              {errors.adminName && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 5 }}>{errors.adminName}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Mail className="w-4 h-4" />
-                </span>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Email Address</label>
+              <div style={{ position: 'relative' }}>
+                <Mail size={14} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@company.com"
-                  autoComplete="email"
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-lg glass-input text-sm ${errors.email ? 'border-red-500/60' : ''}`}
+                  type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@company.com" className="saas-input"
+                  style={{ paddingLeft: 34, borderColor: errors.email ? 'var(--danger)' : undefined }}
                 />
               </div>
-              {errors.email && <p className="text-red-400 text-xs mt-1.5">{errors.email}</p>}
+              {errors.email && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 5 }}>{errors.email}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Lock className="w-4 h-4" />
-                </span>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Password</label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={14} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min. 6 characters"
-                  autoComplete="new-password"
-                  className={`w-full pl-10 pr-10 py-2.5 rounded-lg glass-input text-sm ${errors.password ? 'border-red-500/60' : ''}`}
+                  type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min. 6 characters" className="saas-input"
+                  style={{ paddingLeft: 34, paddingRight: 38, borderColor: errors.password ? 'var(--danger)' : undefined }}
                 />
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
+                  type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
+                  style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              {errors.password && <p className="text-red-400 text-xs mt-1.5">{errors.password}</p>}
+              {errors.password && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 5 }}>{errors.password}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Confirm Password</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Lock className="w-4 h-4" />
-                </span>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Confirm Password</label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={14} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Repeat your password"
-                  autoComplete="new-password"
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-lg glass-input text-sm ${errors.confirmPassword ? 'border-red-500/60' : ''}`}
+                  type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repeat your password" className="saas-input"
+                  style={{ paddingLeft: 34, borderColor: errors.confirmPassword ? 'var(--danger)' : undefined }}
                 />
               </div>
-              {errors.confirmPassword && <p className="text-red-400 text-xs mt-1.5">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 5 }}>{errors.confirmPassword}</p>}
             </div>
 
             <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-2.5 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-sm font-semibold rounded-lg shadow-md shadow-violet-900/30 border border-violet-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 mt-1"
+              type="submit" disabled={isSubmitting} className="btn-primary"
+              style={{ width: '100%', justifyContent: 'center', padding: '10px 18px', fontSize: 14, opacity: isSubmitting ? 0.7 : 1, marginTop: 4 }}
             >
-              {isSubmitting ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                'Create Account'
-              )}
+              {isSubmitting ? <span className="spinner" /> : <>Create Account <ArrowRight size={14} /></>}
             </button>
           </form>
 
-          <p className="mt-5 pt-5 border-t border-white/[0.06] text-center text-sm text-slate-500">
-            Already have an account?{' '}
-            <Link href="/login" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
-              Sign in
-            </Link>
-          </p>
+          <div style={{ marginTop: 20, paddingTop: 18, borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              Already have an account?{' '}
+              <Link href="/login" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}>
+                Sign in
+              </Link>
+            </p>
+          </div>
         </div>
 
       </div>

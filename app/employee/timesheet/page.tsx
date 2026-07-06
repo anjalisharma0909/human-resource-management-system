@@ -34,7 +34,7 @@ export default function TimesheetPage() {
       setLoading(true);
       const res = await authAxios.get('/api/attendance');
       const all: AttendanceLog[] = res.data.attendanceLogs || [];
-      // Show newest first
+      
       setLogs([...all].reverse());
     } catch (err) {
       toast.error('Failed to load timesheet');
@@ -85,7 +85,7 @@ export default function TimesheetPage() {
 
   return (
     <EmployeeLayout>
-      {/* Header */}
+      
       <div className="flex items-center justify-between mb-7">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
@@ -106,7 +106,6 @@ export default function TimesheetPage() {
         </div>
       </div>
 
-      {/* Summary Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
         {stats.map((s) => {
           const Icon = s.icon;
@@ -127,7 +126,6 @@ export default function TimesheetPage() {
         })}
       </div>
 
-      {/* Timesheet Table */}
       <div className="glass-panel rounded-2xl p-6 border border-white/[0.06]">
         <div className="flex items-center gap-2 mb-5">
           <ClipboardList className="w-4 h-4 text-violet-400" />

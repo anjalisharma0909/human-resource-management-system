@@ -112,7 +112,7 @@ export default function ProfilePage() {
             <div className="relative group mb-4">
               
               <img
-                src={avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=256&h=256&fit=crop'}
+                src={avatarUrl || `https://ui-avatars.com/api/?name=${user?.name || 'U'}&background=4f8ef7&color=fff&size=256`}
                 alt="Profile Avatar"
                 className="w-24 h-24 rounded-full object-cover border-2 border-violet-500/50 shadow-lg shadow-violet-900/10"
               />
