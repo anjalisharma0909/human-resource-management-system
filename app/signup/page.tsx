@@ -5,12 +5,13 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { User, Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight, Briefcase } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight, Briefcase, Building2 } from 'lucide-react';
 
 export default function SignupPage() {
   const router = useRouter();
   const [adminName, setAdminName] = useState('');
   const [email, setEmail] = useState('');
+  const [department, setDepartment] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,7 @@ export default function SignupPage() {
     if (!adminName.trim()) e.adminName = 'Full name is required';
     if (!email) e.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Enter a valid email';
+    if (!department.trim()) e.department = 'Department is required';
     if (!password) e.password = 'Password is required';
     else if (password.length < 6) e.password = 'At least 6 characters';
     if (password !== confirmPassword) e.confirmPassword = 'Passwords do not match';
@@ -37,7 +39,7 @@ export default function SignupPage() {
       const names = adminName.trim().split(' ');
       const first_name = names[0];
       const last_name = names.length > 1 ? names.slice(1).join(' ') : 'Admin';
-      const response = await axios.post('/api/auth/signup', { first_name, last_name, email, password, role: 'Admin', department_name: 'HR' });
+      const response = await axios.post('/api/v1/auth/signup', { first_name, last_name, email, password, role: 'Admin', department_name: department });
       if (response.data.message) {
         toast.success('Account created! Please sign in.');
         router.push('/login');
@@ -114,6 +116,27 @@ export default function SignupPage() {
                 />
               </div>
               {errors.email && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 5 }}>{errors.email}</p>}
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Department</label>
+              <div style={{ position: 'relative' }}>
+                <Building2 size={14} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <select
+                  value={department} onChange={(e) => setDepartment(e.target.value)}
+                  className="saas-input"
+                  style={{ paddingLeft: 34, borderColor: errors.department ? 'var(--danger)' : undefined, appearance: 'none' }}
+                >
+                  <option value="" disabled>Select Department</option>
+                  <option value="HR">Human Resources</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Sales">Sales</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Operations">Operations</option>
+                </select>
+              </div>
+              {errors.department && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 5 }}>{errors.department}</p>}
             </div>
 
             <div>
