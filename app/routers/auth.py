@@ -21,14 +21,14 @@ def signup(payload: SignupSchema, db: Session = Depends(get_db)):
         )
     role = payload.role.strip().capitalize()
 
-    # Validate role
+    # Validate 
     if role not in ["Admin", "Employee"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid role. Allowed roles are 'Admin' or 'Employee'"
         )
 
-    # Create new user
+    # Createuser
     new_user = User(
         first_name=payload.first_name,
         last_name=payload.last_name,
@@ -50,20 +50,20 @@ def signup(payload: SignupSchema, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginSchema, db: Session = Depends(get_db)):
-    # Find user by email
+    # For email
     user = db.query(User).filter(
         User.email == payload.email,
         User.is_deleted == False
     ).first()
 
-    # Validate user credentials
+    # Validate
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
 
-    # Generate JWT tokens
+    #  tokens
     access_token, refresh_token = create_tokens(
         user_id=user.user_id,
         role=user.role

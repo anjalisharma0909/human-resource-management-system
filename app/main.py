@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config.database import engine, Base
-from app.routers import auth  
-# Automatically database mein tables banane ke liye
+from app.routers import auth, dashboard, employees, departments, leave, attendance
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -11,7 +11,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -21,6 +20,11 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(dashboard.router, prefix="/api/v1")
+app.include_router(employees.router, prefix="/api/v1")
+app.include_router(departments.router, prefix="/api/v1")
+app.include_router(leave.router, prefix="/api/v1")
+app.include_router(attendance.router, prefix="/api/v1")
 
 @app.get("/")
 def root():

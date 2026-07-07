@@ -14,12 +14,12 @@ class SignupSchema(BaseModel):
     class Config:
         from_attributes = True
 
-# Login Request Schema
+# Login Request 
 class LoginSchema(BaseModel):
     email: EmailStr
     password: str
 
-# Token Response Schema
+# Token Response 
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
