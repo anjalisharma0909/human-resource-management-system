@@ -1,0 +1,7 @@
+hrms-backend/venv/
+**/__pycache__/
+*.pyc
+.env
+
+hrms-frontend/node_modules/
+hrms-frontend/.next/
